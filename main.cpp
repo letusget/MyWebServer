@@ -11,8 +11,8 @@
 #include <fcntl.h>
 #include <signal.h>   //信号相关的头文件
 #include <sys/epoll.h>
-#include "thread_pool/threadpool.h"
 #include "http_conn.h"
+#include "./thread_pool/threadpool.h"
 
 //最大客户端 文件描述符 个数
 #define MAX_FD 65535
@@ -116,15 +116,59 @@ int main(int argc, char* argv[])
                 //有客户端连接
                 struct sockaddr_in client_address;
                 socklen_t client_addrlen=sizeof(client_address);
-                accept(listenfd,(struct sockaddr * )&client_address,&client_addrlen);
+                int connfd = accept(listenfd,(struct sockaddr * )&client_address,&client_addrlen);
+
+                if(http_conn::m_user_count>=MAX_FD)
+                {
+                    //目前连接数已满，可以给出提示
+                    close(connfd);
+                    continue;
+                }
+
+                //将新客户的数据 初始化，放在数组中,将文件描述符作为索引
+                users[connfd].init(connfd, client_address);
+
             }
-            /* code */
+            else if(events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR ))
+            {
+                //对方异常断开，或是 错误 等事件
+                users[sockfd].close_conn();
+            }
+            else if( events[i].events & EPOLLIN )
+            {
+                //一次性读入所有数据
+                if( users[sockfd].read())
+                {
+                    //读入所有数据，进行处理
+                    pool->append(users + sockfd );
+                }
+                else
+                {
+                    //读入失败，或没有读入信息
+                    users[sockfd].close_conn();
+                }
+            }
+            else if(events[i].events & EPOLLOUT)
+            {
+                //一次性写入所有数据
+                if(!users[sockfd].write())
+                {
+                    //如果没有全部写入，就关闭连接
+                    users[sockfd].close_conn();
+                }
+
+            }
+            
         }
         
         
     }
     
-
+    //释放资源
+    close(epollfd);
+    close(listenfd);
+    delete [] users;
+    delete pool;
 
     return 0;
 }
