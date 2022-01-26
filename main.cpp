@@ -96,8 +96,35 @@ int main(int argc, char* argv[])
 
     //将监听的文件描述符添加到 epoll 对象中
     addfd(epollfd,listenfd,false);
+    http_conn::m_epollfd=epollfd;
 
+    while (true)
+    {
+        int num = epoll_wait(epollfd,events,MAX_EVENT_NUMBER,-1);
+        if( ( num < 0 ) && (errno != EINTR ) )
+        {
+            printf("epoll failure\n");
+            break;
+        }
+        
+        //循环遍历 事件数组
+        for (int i = 0; i < num; i++)
+        {
+            int sockfd=events[i].data.fd;
+            if(sockfd==listenfd)
+            {
+                //有客户端连接
+                struct sockaddr_in client_address;
+                socklen_t client_addrlen=sizeof(client_address);
+                accept(listenfd,(struct sockaddr * )&client_address,&client_addrlen);
+            }
+            /* code */
+        }
+        
+        
+    }
     
+
 
     return 0;
 }

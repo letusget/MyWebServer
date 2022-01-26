@@ -20,7 +20,12 @@
 class http_conn
 {
 private:
-    /* data */
+    //该 HTTP 连接的socket
+    int m_sockfd;
+
+    //连接信息, 通信的socket信息
+    sockaddr_in m_address;
+    
 public:
     http_conn(/* args */);
 
