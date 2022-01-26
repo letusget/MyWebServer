@@ -95,6 +95,8 @@ int main(int argc, char* argv[])
     int epollfd=epoll_create(5);
 
     //将监听的文件描述符添加到 epoll 对象中
+    addfd(epollfd,listenfd,false);
+
     
 
     return 0;

@@ -27,6 +27,11 @@ public:
     //处理客户端请求和响应
     void process();
 
+    //所有的socket 上的事件，都要被注册到同一个epoll 对象上
+    static int m_epollfd;
+    //统计所有用户的数量
+    static int m_user_count;
+
     ~http_conn();
 };
 
