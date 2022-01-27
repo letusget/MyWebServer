@@ -5,9 +5,9 @@
 #include <list>
 #include <cstdio>
 #include <iostream>
-#include "thread_pool/condition.h"
-#include "thread_pool/locker.h"
-#include "thread_pool/sem.h"
+#include "condition.h"
+#include "locker.h"
+#include "sem.h"
 
 //线程池的封装类
 

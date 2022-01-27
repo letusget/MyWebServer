@@ -36,7 +36,9 @@ void addfd(int epollfd,int fd,bool one_shot)
     epoll_event event;
     event.data.fd=fd;
     //水平触发 2.6.17内核后支持EPOLLREHUP，可以通过事件直接判断，在底层对 连接 断开等进行处理
-    event.events=EPOLLIN | EPOLLRDHUP;
+    //event.events=EPOLLIN | EPOLLRDHUP;
+    //边沿触发, 但是这样 listenfd 也变为 边沿触发了，稍微有点问题
+    event.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
 
     if(one_shot)
     {
@@ -99,12 +101,45 @@ void http_conn::close_conn()
 
 }
 
-//非阻塞 一次性读入数据
+//非阻塞 一次性读入数据，直到无数据可读或者对方关闭连接
 bool http_conn::read()
 {
-    //暂时这样处理
-    printf("一次性 读完数据\n");
+    //缓冲区已满
+    if(m_read_idx>=READ_BUFFER_SIZE)
+    {
+        return false;
+    }
+
+    //读取到的字节
+    int bytes_read = 0;
+    while (true)
+    {
+        bytes_read = recv(m_sockfd,m_read_buf+m_read_idx,READ_BUFFER_SIZE-m_read_idx,0);
+        if(bytes_read == -1)
+        {
+            if(errno == EAGAIN || errno == EWOULDBLOCK)
+            {
+                //没有数据
+                break;
+            }
+            return false;
+        }
+        else if(bytes_read == 0)
+        {
+            //对方关闭连接
+            return false;
+        }
+
+        //读到数据了
+        m_read_idx += bytes_read;
+        
+    }
+
+    //读入到了数据
+    printf("读取到了数据：%s\n",m_read_buf);
     return true;
+    
+    
 }
 
 //非堵塞，一次性写入数据

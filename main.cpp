@@ -12,7 +12,9 @@
 #include <signal.h>   //信号相关的头文件
 #include <sys/epoll.h>
 #include "http_conn.h"
-#include "./thread_pool/threadpool.h"
+//#include "thread_pool/threadpool.h"
+#include "threadpool.h"
+
 
 //最大客户端 文件描述符 个数
 #define MAX_FD 65535
