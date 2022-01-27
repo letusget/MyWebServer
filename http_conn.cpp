@@ -63,8 +63,14 @@ void removefd(int epollfd,int fd)
 void http_conn::process()
 {
     //解析HTTP 请求
+    HTTP_CODE read_ret = process_read();
+    if (read_ret == NO_REQUEST )
+    {
+        //请求不完整, 重新检测
+        modfd(m_epollfd,m_sockfd,EPOLLIN);
+        return;
+    }
 
-    printf("parse request, create response\n");
 
     //生成响应
 
@@ -149,6 +155,39 @@ bool http_conn::write()
     printf("一次性 写入数据\n");
     return true;
 }
+
+
+//解析 HTTP 请求
+http_conn::HTTP_CODE http_conn::process_read()
+{
+
+    return NO_REQUEST;
+}
+
+//解析请求首行
+http_conn::HTTP_CODE http_conn::parse_request_line(char * text)
+{
+
+}
+
+//解析请求头
+http_conn::HTTP_CODE http_conn::parse_headers(char * text)
+{
+
+}
+
+//解析请求体
+http_conn::HTTP_CODE http_conn::parse_content(char * text)
+{
+
+}
+
+//解析某一行数据 根据换行判断，再根据这行的状态，来交给上面对应的处理函数
+http_conn::LINE_STATUS http_conn::parse_line()
+{
+    return LINE_OK;
+}
+
 
 
 
