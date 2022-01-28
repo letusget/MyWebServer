@@ -14,6 +14,7 @@
 #include <sys/mman.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <string.h>
 #include "thread_pool/locker.h"
 #include <sys/uio.h>
 
@@ -24,6 +25,9 @@ public:
     static int m_epollfd;
     //统计所有用户的数量
     static int m_user_count;
+    // 文件名的最大长度
+    static const int FILENAME_LEN = 200;        
+
     //读 缓冲大小
     static const int READ_BUFFER_SIZE = 2048 ;
     //写缓冲 大小
@@ -93,6 +97,37 @@ private:
     //表示读缓冲区中已经读入的客户端数据的最后一个字节的下一个位置
     int m_read_idx;
 
+    //当前正在分析的字符在缓冲区的位置
+    int m_checked_index;
+
+    //当前正在解析的行的起始位置
+    int m_start_line;
+
+    //请求目标文件的文件名
+    char * m_url;
+    //请求的协议版本，目前仅支持 HTTP1.1
+    char * m_version;
+    //请求方法
+    METHOD m_method;
+    //主机名
+    char * m_host;
+    //判断HTTP 请求是否保持连接信息
+    bool m_linger;
+    //HTTP 请求的消息总长度
+    int m_content_length;
+
+    //客户请求的目标文件的完整路径，其内容等于 doc_root + m_rul, doc_root作为网站的根目录
+    char m_real_file [ FILENAME_LEN ];
+    
+
+    //读状态机, 主状态机所处的状态
+    CHECK_STATE m_check_state;
+
+    //初始化以上的（其他信息）
+    void init();    //函数重载
+
+    //做具体响应处理
+    HTTP_CODE do_request();
 
     //解析 HTTP 请求
     HTTP_CODE process_read();
@@ -108,6 +143,10 @@ private:
 
     //解析某一行数据 根据换行判断，再根据这行的状态，来交给上面对应的处理函数
     LINE_STATUS parse_line();
+
+    //获取一行数据  内联函数
+    char * get_line(){ return m_read_buf + m_start_line; }
+
 
 };
 
