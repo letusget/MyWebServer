@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <signal.h>   //信号相关的头文件
 #include <sys/epoll.h>
+#include <assert.h> //断言
 #include "http_conn.h"
 //#include "thread_pool/threadpool.h"
 #include "threadpool.h"
@@ -72,15 +73,19 @@ int main(int argc, char* argv[])
         exit(-1);
     }
 
-    //设置端口复用
-    int reuse=1;
-    setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,&reuse,sizeof(reuse));
+    // int ret=0;
 
     //绑定
     struct sockaddr_in address;
     address.sin_family = AF_INET;
     address.sin_addr.s_addr=INADDR_ANY;
     address.sin_port = htons(port); //转化为网络字节序
+
+    //设置端口复用
+    int reuse=1;
+    setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,&reuse,sizeof(reuse));
+    
+    
     int bret = bind(listenfd,(struct sockaddr* )&address,sizeof(address));
     if(bret==-1)
     {
@@ -90,7 +95,7 @@ int main(int argc, char* argv[])
 
     
     //监听
-    listen(listenfd,5);
+    bret = listen(listenfd,5);
 
     //创建epoll 对象，时间数组，添加文件描述符
     epoll_event events[MAX_EVENT_NUMBER];
@@ -119,6 +124,11 @@ int main(int argc, char* argv[])
                 struct sockaddr_in client_address;
                 socklen_t client_addrlen=sizeof(client_address);
                 int connfd = accept(listenfd,(struct sockaddr * )&client_address,&client_addrlen);
+
+                if ( connfd < 0 ) {
+                    printf( "errno is: %d\n", errno );
+                    continue;
+                } 
 
                 if(http_conn::m_user_count>=MAX_FD)
                 {
@@ -186,6 +196,6 @@ void addsig(int sig,void (handler)(int))
     sa.sa_handler=handler;
     //临时阻塞信号值
     sigfillset(&sa.sa_mask);
-    sigaction(sig,&sa,nullptr);
-
+    assert(sigaction(sig,&sa,nullptr)!=-1);
+    
 }

@@ -63,7 +63,7 @@ public:
     enum LINE_STATUS { LINE_OK = 0, LINE_BAD, LINE_OPEN };
 
 
-
+    //构造
     http_conn();
 
     //处理客户端请求和响应
@@ -81,6 +81,7 @@ public:
     //非堵塞，一次性写入数据
     bool write();
 
+    //析构
     ~http_conn();
 
 private:

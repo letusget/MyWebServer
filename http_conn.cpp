@@ -128,10 +128,12 @@ void http_conn::init()    //函数重载
     m_url = 0;
     m_version = 0;
     m_content_length = 0;
-    m_linger = false;
+    m_linger = false;   // 默认不保持链接  Connection : keep-alive保持连接
     m_host = 0;
     m_start_line = 0;
-    //m_checked_index = 0;
+
+    m_checked_index = 0;
+
     m_read_idx = 0;
     m_write_idx = 0;
 
@@ -155,6 +157,7 @@ bool http_conn::read()
     int bytes_read = 0;
     while (true)
     {
+        // 从m_read_buf + m_read_idx索引出开始保存数据，大小是READ_BUFFER_SIZE - m_read_idx
         bytes_read = recv(m_sockfd,m_read_buf+m_read_idx,READ_BUFFER_SIZE-m_read_idx,0);
         if(bytes_read == -1)
         {
@@ -224,10 +227,11 @@ http_conn::LINE_STATUS http_conn::parse_line()
         }
 
         //数据不完整
-        return LINE_OPEN;
+        //return LINE_OPEN;
 
     }
-    return LINE_OK;
+    return LINE_OPEN;
+    //return LINE_OK;
 }
 /*
 / 解析一行，判断依据\r\n
@@ -263,6 +267,11 @@ http_conn::HTTP_CODE http_conn::parse_request_line(char * text)
     //使用正则表达式 进行处理 或 传统字符串操作匹配
     // GET /index.html HTTP/1.1
     m_url = strpbrk (text, " \t");   //检验 \n 的位置
+    
+    if (! m_url) 
+    { 
+        return BAD_REQUEST;
+    }
 
     //变为 GET\0/index.html HTTP/1.1
     *m_url ++ = '\0';
@@ -391,7 +400,7 @@ http_conn::HTTP_CODE http_conn::do_request()
     }
 
     //判断访问权限 访问权限
-    if(!m_file_stat.st_mode & S_IROTH)
+    if(!(m_file_stat.st_mode & S_IROTH))    
     {
         return  FORBIDDEN_REQUEST;
     }
@@ -457,7 +466,7 @@ http_conn::HTTP_CODE http_conn::process_read()
                 //具体解析请求
                 return do_request();
             }
-
+            break;
         }
         case CHECK_STATE_CONTENT:
         {

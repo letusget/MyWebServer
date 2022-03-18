@@ -20,13 +20,13 @@ sem::sem(int num)
 //等待信号量,对信号量加锁
 bool sem::wait()
 {
-    return sem_wait(&m_sem);
+    return sem_wait(&m_sem)==0;
 }
 
 //增加信号量，对信号量解锁
 bool sem::post()
 {
-    return sem_post(&m_sem);
+    return sem_post(&m_sem)==0;
 }
 
 sem::~sem()
