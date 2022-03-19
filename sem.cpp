@@ -4,6 +4,7 @@ sem::sem()
 {
     if(sem_init(&m_sem,0,0)!=0)
     {
+        //抛出异常
         throw std::exception();
     }
 }
@@ -13,6 +14,7 @@ sem::sem(int num)
 {
     if(sem_init(&m_sem,0,num)!=0)
     {
+        //抛出异常
         throw std::exception();
     }
 }

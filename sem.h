@@ -5,7 +5,7 @@
 #include <exception>    //异常类
 #include <semaphore.h>  //信号量需要的头文件
 
-//信号类
+//信号量类
 class sem
 {
 private:

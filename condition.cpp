@@ -1,9 +1,11 @@
 #include "condition.h"
 
-cond::cond(/* args */)
+//构造
+cond::cond()
 {
-    if(pthread_cond_init(&m_cond,nullptr))
+    if(pthread_cond_init(&m_cond,nullptr)!=0)
     {
+        //抛出异常
         throw std::exception();
 
     }
@@ -21,7 +23,7 @@ bool cond::timedwait(pthread_mutex_t * mutex, struct timespec t)
     return pthread_cond_timedwait(&m_cond,mutex,&t) == 0;
 }
 
-//信号 唤醒某个线程
+//信号 唤醒一个或多个线程
 bool cond::signal(pthread_mutex_t * mutex)
 {
     return pthread_cond_signal(&m_cond) == 0;

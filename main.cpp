@@ -12,6 +12,7 @@
 #include <signal.h>   //信号相关的头文件
 #include <sys/epoll.h>
 #include <assert.h> //断言
+
 #include "http_conn.h"
 //#include "thread_pool/threadpool.h"
 #include "threadpool.h"
@@ -32,7 +33,7 @@ extern void addfd(int epollfd,int fd,bool one_shot);
 // 从 epoll 中删除文件描述符
 extern int removefd(int epollfd,int fd);
 
-//修改文件描述符
+//修改epoll 中的文件描述符
 extern void modfd(int epollfd,int fd,int ev);
 
 //因为在运行时要指定端口号，所以在这里需要参数
@@ -47,7 +48,7 @@ int main(int argc, char* argv[])
     //获取端口号, 要将输入的字符串的端口号转化为整形
     int port = atoi(argv[1]);
 
-    //对 SIGPIE 信号进行处理: 忽略该信号
+    //对 SIGPIE 信号进行处理: 忽略该信号，不终止进程
     addsig(SIGPIPE,SIG_IGN);
 
     //创建线程池，初始化信息
@@ -75,29 +76,26 @@ int main(int argc, char* argv[])
 
     // int ret=0;
 
+    //设置端口复用
+    int reuse=1;
+    setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,&reuse,sizeof(reuse));
+
     //绑定
     struct sockaddr_in address;
     address.sin_family = AF_INET;
     address.sin_addr.s_addr=INADDR_ANY;
-    address.sin_port = htons(port); //转化为网络字节序
-
-    //设置端口复用
-    int reuse=1;
-    setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,&reuse,sizeof(reuse));
-    
-    
+    address.sin_port = htons(port); //转化为网络字节序    
     int bret = bind(listenfd,(struct sockaddr* )&address,sizeof(address));
     if(bret==-1)
     {
         perror("bind");
         exit(-1);
     }
-
     
     //监听
     bret = listen(listenfd,5);
 
-    //创建epoll 对象，时间数组，添加文件描述符
+    //多路复用 创建epoll 对象，事件数组，添加文件描述符
     epoll_event events[MAX_EVENT_NUMBER];
     int epollfd=epoll_create(5);
 
@@ -185,12 +183,12 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-//信号捕捉函数
+//回调函数  信号捕捉函数  
 void addsig(int sig,void (handler)(int))
 {
     //注册信号
     struct sigaction sa;
-    //使用复制函数，提前清空sa内容
+    //注册信号的参数  使用复制函数，提前清空sa内容
     memset(&sa,'\n',sizeof(sa));
 
     sa.sa_handler=handler;
