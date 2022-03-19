@@ -49,7 +49,7 @@ void addfd(int epollfd,int fd,bool one_shot)
 
     if(one_shot)
     {
-        event.events |= EPOLLONESHOT;
+        event.events |= EPOLLONESHOT;   //TODO
     }
     epoll_ctl(epollfd,EPOLL_CTL_ADD,fd,&event);
 
@@ -61,6 +61,7 @@ void addfd(int epollfd,int fd,bool one_shot)
 void removefd(int epollfd,int fd)
 {
     epoll_ctl(epollfd,EPOLL_CTL_DEL,fd,0);
+    //关闭文件描述符
     close(fd);
 
 }
