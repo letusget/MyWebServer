@@ -1,5 +1,6 @@
 #include "http_conn.h"
 
+//类外初始化
 // 所有socket上的事件都被注册到同一个epoll内核事件中，所以设置成静态的
 int http_conn::m_epollfd = -1;
 // 所有的客户数
@@ -28,12 +29,12 @@ http_conn::~http_conn()
 }
 
 //设置文件描述符 非阻塞
-int setnoblocking(int fd)
+void setnoblocking(int fd)
 {
     int old_flag = fcntl(fd, F_GETFL);
     int new_flag = old_flag | O_NONBLOCK;
     fcntl(fd, F_SETFL, new_flag);
-    return old_flag;
+    //return old_flag;    //TODO
 }
 
 //向epoll 中添加需要的文件描述符
@@ -83,6 +84,7 @@ void http_conn::close_conn()
     //判断连接情况
     if(m_sockfd!=-1)
     {
+        //关闭连接
         removefd(m_epollfd,m_sockfd);
         m_sockfd=-1;
 
@@ -96,6 +98,7 @@ void http_conn::close_conn()
 //初始化新接收的连接
 void http_conn::init(int sockfd, const sockaddr_in & addr)
 {
+    //初始化
     m_sockfd = sockfd;
     m_address=addr;
 
@@ -107,7 +110,7 @@ void http_conn::init(int sockfd, const sockaddr_in & addr)
     addfd(m_epollfd, sockfd, true);
     m_user_count++; //总用户数增加
 
-    //初始化其他信息,因为可能会用到其他的浙西信息，所以分开初始化会更方便
+    //初始化其他信息,因为可能会用到其他的这些信息，所以分开初始化会更方便
     init();
 }
 
@@ -208,7 +211,7 @@ http_conn::LINE_STATUS http_conn::parse_line()
                 //将原来的 \n 换为 \0 (字符串结束符)
                 m_read_buf[m_checked_index++]='\0';
                 //将原来的 \t 换为 \0 (字符串结束符)
-                m_read_buf[m_checked_index++]='\n';
+                m_read_buf[m_checked_index++]='\0'; //TODO
                 return LINE_OK;
             }
             return LINE_BAD;
@@ -445,47 +448,47 @@ http_conn::HTTP_CODE http_conn::process_read()
 
         switch (m_check_state)
         {
-        case CHECK_STATE_REQUESTLINE:
-        {
-            ret = parse_request_line(text);
-            if(ret == BAD_REQUEST)
+            case CHECK_STATE_REQUESTLINE:
             {
-                return BAD_REQUEST;
+                ret = parse_request_line(text);
+                if(ret == BAD_REQUEST)
+                {
+                    return BAD_REQUEST;
+                }
+                break;
             }
-            break;
-        }
 
-        case CHECK_STATE_HEADER:
-        {
-            ret = parse_headers(text);
-            if(ret == BAD_REQUEST)
+            case CHECK_STATE_HEADER:
             {
-                return BAD_REQUEST;
+                ret = parse_headers(text);
+                if(ret == BAD_REQUEST)
+                {
+                    return BAD_REQUEST;
+                }
+                else if(ret == GET_REQUEST)
+                {
+                    //具体解析请求
+                    return do_request();
+                }
+                break;
             }
-            else if(ret == GET_REQUEST)
+            case CHECK_STATE_CONTENT:
             {
-                //具体解析请求
-                return do_request();
+                ret = parse_content(text);
+                if(ret == GET_REQUEST)
+                {
+                    return do_request();
+                }
+                line_status = LINE_OPEN;
+                break;
             }
-            break;
-        }
-        case CHECK_STATE_CONTENT:
-        {
-            ret = parse_content(text);
-            if(ret == GET_REQUEST)
-            {
-                return do_request();
-            }
-            line_status = LINE_OPEN;
-            break;
-        }
+                
             
-        
-        default:
-        {
-            return INTERNAL_ERROR;
-            break;
-        }
+            default:
+            {
+                return INTERNAL_ERROR;
+                break;
+            }
             
         }
     } 

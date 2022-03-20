@@ -12,9 +12,8 @@
 #include <signal.h>   //信号相关的头文件
 #include <sys/epoll.h>
 #include <assert.h> //断言
-
 #include "http_conn.h"
-//#include "thread_pool/threadpool.h"
+
 #include "threadpool.h"
 
 
@@ -101,11 +100,12 @@ int main(int argc, char* argv[])
 
     //将监听的文件描述符添加到 epoll 对象中
     addfd(epollfd,listenfd,false);
-    http_conn::m_epollfd=epollfd;
+    http_conn::m_epollfd=epollfd;   //访问静态成员
 
     while (true)
     {
         int num = epoll_wait(epollfd,events,MAX_EVENT_NUMBER,-1);
+        //调用失败的情况，直接退出循环
         if( ( num < 0 ) && (errno != EINTR ) )
         {
             printf("epoll failure\n");
@@ -122,8 +122,9 @@ int main(int argc, char* argv[])
                 struct sockaddr_in client_address;
                 socklen_t client_addrlen=sizeof(client_address);
                 int connfd = accept(listenfd,(struct sockaddr * )&client_address,&client_addrlen);
-
-                if ( connfd < 0 ) {
+                if ( connfd < 0 ) 
+                {
+                    //连接失败的情况
                     printf( "errno is: %d\n", errno );
                     continue;
                 } 
@@ -139,7 +140,7 @@ int main(int argc, char* argv[])
                 users[connfd].init(connfd, client_address);
 
             }
-            else if(events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR ))
+            else if(events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR )) //异常通信
             {
                 //对方异常断开，或是 错误 等事件
                 users[sockfd].close_conn();
@@ -154,7 +155,7 @@ int main(int argc, char* argv[])
                 }
                 else
                 {
-                    //读入失败，或没有读入信息
+                    //读入失败，或没有读入信息 就关闭连接
                     users[sockfd].close_conn();
                 }
             }

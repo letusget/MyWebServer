@@ -15,7 +15,8 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
-#include "thread_pool/locker.h"
+//#include "thread_pool/locker.h"
+#include "locker.h"
 #include <sys/uio.h>
 
 class http_conn
@@ -88,7 +89,7 @@ private:
     //该 HTTP 连接的socket
     int m_sockfd;
 
-    //连接信息, 通信的socket信息
+    //连接信息, 通信的socket地址
     sockaddr_in m_address;
 
     //读缓冲区
