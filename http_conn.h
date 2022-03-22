@@ -191,6 +191,10 @@ private:
     //获取一行数据  内联函数
     char * get_line(){ return m_read_buf + m_start_line; }
 
+
+    int bytes_to_send;              // 将要发送的数据的字节数
+    int bytes_have_send;            // 已经发送的字节数
+
 };
 
 

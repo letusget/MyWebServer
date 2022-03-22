@@ -6,8 +6,10 @@ int http_conn::m_epollfd = -1;
 // 所有的客户数
 int http_conn::m_user_count = 0;
 
-//网站的根目录
-const char* doc_root="/root/webserver/resources";
+//绝对路径的网站的根目录
+//const char* doc_root="/root/webserver/resources";
+//相对路径的根目录
+const char* doc_root="./resources";
 
 //定义HTTP 响应的一些状态信息，响应描述信息
 const char * ok_200_title = "OK";
@@ -117,6 +119,9 @@ void http_conn::init(int sockfd, const sockaddr_in & addr)
 //初始化以上的（其他信息）
 void http_conn::init()    //函数重载
 {
+    bytes_to_send = 0;
+    bytes_have_send = 0;
+
     //初始化 状态为解析请求首行
     m_check_state = CHECK_STATE_REQUESTLINE;
 
@@ -624,6 +629,9 @@ bool http_conn::process_write(HTTP_CODE ret)
         m_iv[1].iov_base=m_file_address;
         m_iv[1].iov_len=m_file_stat.st_size;
         m_iv_count=2;
+
+        bytes_to_send = m_write_idx + m_file_stat.st_size;
+
         return true;
         break;
     
@@ -644,9 +652,9 @@ bool http_conn::write()
 {
     int temp = 0;
     //已经发送的字节
-    int bytes_have_send=0;
+    //int bytes_have_send=0;
     //将要发送的字节 m_write_idx写缓冲区中待发送的字节数
-    int bytes_to_send = m_write_idx;
+    //int bytes_to_send = m_write_idx;
 
     if(bytes_to_send == 0)
     {
@@ -674,23 +682,53 @@ bool http_conn::write()
         }
         bytes_to_send -= temp;
         bytes_have_send += temp;
-        if(bytes_to_send <= bytes_have_send)
+
+        if (bytes_have_send >= m_iv[0].iov_len)
         {
-            //发送 HTTP 响应成功，根据 HTTP 请求中的Connection 字段决定是否理解关闭连接
+            m_iv[0].iov_len = 0;
+            m_iv[1].iov_base = m_file_address + (bytes_have_send - m_write_idx);
+            m_iv[1].iov_len = bytes_to_send;
+        }
+        else
+        {
+            m_iv[0].iov_base = m_write_buf + bytes_have_send;
+            m_iv[0].iov_len = m_iv[0].iov_len - temp;
+        }
+        if (bytes_to_send <= 0)
+        {
+            // 没有数据要发送了 //发送 HTTP 响应成功，根据 HTTP 请求中的Connection 字段决定是否理解关闭连接
             unmap();
-            if(m_linger)
+            modfd(m_epollfd, m_sockfd, EPOLLIN);
+
+            if (m_linger)
             {
                 //重置监听事件
                 init();
-                modfd(m_epollfd,m_sockfd,EPOLLIN);
                 return true;
             }
-            else 
+            else
             {
-                modfd(m_epollfd,m_sockfd,EPOLLIN);
                 return false;
             }
         }
+
+        // if(bytes_to_send <= bytes_have_send)
+        // {
+        //     //发送 HTTP 响应成功，根据 HTTP 请求中的Connection 字段决定是否理解关闭连接
+        //     unmap();
+        //     if(m_linger)
+        //     {
+        //         //重置监听事件
+        //         init();
+        //         modfd(m_epollfd,m_sockfd,EPOLLIN);
+        //         return true;
+        //     }
+        //     else 
+        //     {
+        //         modfd(m_epollfd,m_sockfd,EPOLLIN);
+        //         return false;
+        //     }
+        // }
         
     }
 
