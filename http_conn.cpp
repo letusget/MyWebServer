@@ -9,6 +9,7 @@ int http_conn::m_user_count = 0;
 //网站的根目录
 const char* doc_root="/root/webserver/resources";
 
+
 //定义HTTP 响应的一些状态信息，响应描述信息
 const char * ok_200_title = "OK";
 const char * error_400_title = "Bad Request";
