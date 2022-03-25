@@ -7,7 +7,7 @@
 
 ## Denon演示
 
-演示效果如下：
+gif演示效果如下：
 
 ![Demo](https://tvax3.sinaimg.cn/large/006x3t5Xgy1h0iwn6cg82g30ja0aqe81.gif)
 
