@@ -2,15 +2,14 @@
 
 - 使用 线程池 + 非阻塞socket + epoll(LT实现) + 事件处理(Proactor模式)并发模型
 - 使用状态机解析HTTP请求报文，支持解析GET和POST请求
-- 访问服务器数据库实现web端用户请求页面，可以请求服务器图片和其他数据信息
-- 实现同步/异步日志系统，记录服务器运行状态 （等待添加）
+- 访问服务器数据库实现web端用户请求页面，可以请求服务器图片或其他数据信息
 - 经Webbench压力测试可以实现上万的并发连接数据交换 （等待添加）
 
 ## Denon演示
 
 演示效果如下：
 
-项目演示
+![Demo](https://tvax3.sinaimg.cn/large/006x3t5Xgy1h0iwn6cg82g30ja0aqe81.gif)
 
 ## 项目运行
 
@@ -53,7 +52,3 @@
     ```cpp
     ip:port/index.html
     ```
-
-
-
-
