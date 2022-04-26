@@ -1,9 +1,21 @@
 #ifndef LST_TIMER
 #define LST_TIMER
-
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <assert.h>
+#include <signal.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/epoll.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <time.h>
 #include <arpa/inet.h>
+
 
 //使用升序双链表 实现去除不活跃连接，提高效率
 
