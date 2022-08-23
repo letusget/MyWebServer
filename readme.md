@@ -23,9 +23,7 @@ gif演示效果如下：
 
     Linux、windows环境均可
 
-    Chrome
-
-    Firefox
+    Chrome、Firefox 浏览器访问达到预期。
 
     其他环境与浏览器暂未测试
 
