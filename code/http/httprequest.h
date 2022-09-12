@@ -47,6 +47,7 @@ public:
     std::string GetPost(const std::string& key) const;
     std::string GetPost(const char* key) const;
 
+    //保持连接
     bool IsKeepAlive() const;
 
 private:
@@ -69,10 +70,10 @@ private:
 
     PARSE_STATE state_;     // 解析的状态
     std::string method_, path_, version_, body_;    // 请求方法，请求路径，协议版本，请求体
-    std::unordered_map<std::string, std::string> header_;   // 请求头
+    std::unordered_map<std::string, std::string> header_;   // 请求头 (键值对)
     std::unordered_map<std::string, std::string> post_;     // post请求表单数据
 
-    static const std::unordered_set<std::string> DEFAULT_HTML;  // 默认的网页
+    static const std::unordered_set<std::string> DEFAULT_HTML;  // 默认的网页  index.html
     static const std::unordered_map<std::string, int> DEFAULT_HTML_TAG; 
     static int ConverHex(char ch);  // 将十六进制字符转换成十进制整数
 };

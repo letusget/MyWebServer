@@ -132,12 +132,12 @@ bool HttpConn::process()
     {                                   // 解析请求数据
         LOG_DEBUG("%s", request_.path().c_str());
 
-        // 解析玩请求数据以后，初始化响应对象
+        // 解析玩请求数据以后，初始化响应对象，解析成功返回200
         response_.Init(srcDir, request_.path(), request_.IsKeepAlive(), 200);
     }
     else
     {
-        // 解析失败
+        // 解析失败，返回响应信息（初始化响应信息），返回400
         response_.Init(srcDir, request_.path(), false, 400);
     }
 

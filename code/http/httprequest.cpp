@@ -18,7 +18,9 @@ const unordered_map<string, int> HttpRequest::DEFAULT_HTML_TAG{
 // 初始化请求对象信息
 void HttpRequest::Init()
 {
+    //初始方法、路径、版本号、请求体
     method_ = path_ = version_ = body_ = "";
+
     state_ = REQUEST_LINE;
     header_.clear();
     post_.clear();
@@ -36,22 +38,27 @@ bool HttpRequest::IsKeepAlive() const
 // 解析请求数据
 bool HttpRequest::parse(Buffer &buff)
 {
+    //获取一个请求行
     const char CRLF[] = "\r\n"; // 行结束符
     if (buff.ReadableBytes() <= 0)
     {
         return false;
     }
-    // buff中有数据可读，并且状态没有到FINISH，就一直解析
+
+    // buff中有数据可读，并且状态没有到FINISH，就一直按行解析
     while (buff.ReadableBytes() && state_ != FINISH)
     {
         // 获取一行数据，根据\r\n为结束标志
         const char *lineEnd = search(buff.Peek(), buff.BeginWriteConst(), CRLF, CRLF + 2);
+        //截取请求行
         std::string line(buff.Peek(), lineEnd);
+
+        //有限状态机 进行解析请求行
         switch (state_)
         {
         case REQUEST_LINE:
             // 解析请求首行
-            if (!ParseRequestLine_(line))
+            if (!ParseRequestLine_(line))   //在 ParseRequestLine_ 中控制 state_ 实现不同状态的转换
             {
                 return false;
             }
@@ -77,6 +84,7 @@ bool HttpRequest::parse(Buffer &buff)
         {
             break;
         }
+        //移动读指针
         buff.RetrieveUntil(lineEnd + 2);
     }
     LOG_DEBUG("[%s], [%s], [%s]", method_.c_str(), path_.c_str(), version_.c_str());
@@ -108,7 +116,7 @@ void HttpRequest::ParsePath_()
 
 bool HttpRequest::ParseRequestLine_(const string &line)
 {
-    // GET / HTTP/1.1
+    // GET / HTTP/1.1  正则表达式进行匹配
     regex patten("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$");
     smatch subMatch;
     if (regex_match(line, subMatch, patten))
@@ -116,6 +124,7 @@ bool HttpRequest::ParseRequestLine_(const string &line)
         method_ = subMatch[1];
         path_ = subMatch[2];
         version_ = subMatch[3];
+        //匹配成功，就改变 解析状态
         state_ = HEADERS;
         return true;
     }
@@ -135,6 +144,7 @@ void HttpRequest::ParseHeader_(const string &line)
     }
     else
     {
+        //解析到 换行，就不匹配了，就继续解析请求体
         state_ = BODY;
     }
 }

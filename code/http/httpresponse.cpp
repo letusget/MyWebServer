@@ -58,6 +58,7 @@ void HttpResponse::Init(const string &srcDir, string &path, bool isKeepAlive, in
 {
     assert(srcDir != "");
 
+    //内存映射
     if (mmFile_)
     {
         UnmapFile();
@@ -75,20 +76,25 @@ void HttpResponse::MakeResponse(Buffer &buff)
 {
     /* 判断请求的资源文件 */
     // index.html
-    // /home/nowcoder/WebServer-master/resources/index.html
+    // /root/webserver/resources/index.html
     if (stat((srcDir_ + path_).data(), &mmFileStat_) < 0 || S_ISDIR(mmFileStat_.st_mode))
     {
+        //访问目录等不存在的资源
         code_ = 404;
     }
     else if (!(mmFileStat_.st_mode & S_IROTH))
     {
+        //缺少访问权限
         code_ = 403;
     }
     else if (code_ == -1)
     {
+        //默认值-1 的情况
         code_ = 200;
     }
+    //返回错误网页
     ErrorHtml_();
+    //添加响应首行
     AddStateLine_(buff);
     AddHeader_(buff);
     AddContent_(buff);
@@ -119,6 +125,7 @@ void HttpResponse::AddStateLine_(Buffer &buff)
     string status;
     if (CODE_STATUS.count(code_) == 1)
     {
+        //找到该状态对应的 状态描述
         status = CODE_STATUS.find(code_)->second;
     }
     else
@@ -126,6 +133,7 @@ void HttpResponse::AddStateLine_(Buffer &buff)
         code_ = 400;
         status = CODE_STATUS.find(400)->second;
     }
+    //构造响应信息
     buff.Append("HTTP/1.1 " + to_string(code_) + " " + status + "\r\n");
 }
 
@@ -142,6 +150,7 @@ void HttpResponse::AddHeader_(Buffer &buff)
     {
         buff.Append("close\r\n");
     }
+    //响应文件类型
     buff.Append("Content-type: " + GetFileType_() + "\r\n");
 }
 
@@ -151,6 +160,7 @@ void HttpResponse::AddContent_(Buffer &buff)
     int srcFd = open((srcDir_ + path_).data(), O_RDONLY);
     if (srcFd < 0)
     {
+        //未找到
         ErrorContent(buff, "File NotFound!");
         return;
     }
@@ -161,12 +171,15 @@ void HttpResponse::AddContent_(Buffer &buff)
     int *mmRet = (int *)mmap(0, mmFileStat_.st_size, PROT_READ, MAP_PRIVATE, srcFd, 0);
     if (*mmRet == -1)
     {
+        //未成功打开文件
         ErrorContent(buff, "File NotFound!");
         return;
     }
     mmFile_ = (char *)mmRet;
     close(srcFd);
-    buff.Append("Content-length: " + to_string(mmFileStat_.st_size) + "\r\n\r\n");
+    //写入文件大小
+    buff.Append("Content-length: " + to_string(mmFileStat_.st_size) + "\r\n\r\n");  //分别标志请求行结束和一个空行
+    
 }
 
 // 解除内存映射
@@ -181,7 +194,7 @@ void HttpResponse::UnmapFile()
 
 string HttpResponse::GetFileType_()
 {
-    /* 判断文件类型 */
+    /* 根据文件后缀，判断文件类型 */
     string::size_type idx = path_.find_last_of('.');
     if (idx == string::npos)
     {

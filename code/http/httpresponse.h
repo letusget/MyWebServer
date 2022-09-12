@@ -34,7 +34,7 @@ private:
     int code_;  // 响应状态码
     bool isKeepAlive_;  // 是否保持连接
 
-    std::string path_;  // 资源的路径
+    std::string path_;  // 服务器资源的路径
     std::string srcDir_;    // 资源的目录
     
     char* mmFile_;  // 文件内存映射的指针
