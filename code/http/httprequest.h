@@ -19,9 +19,10 @@ public:
         REQUEST_LINE,   // 正在解析请求首行
         HEADERS,        // 头
         BODY,           // 体
-        FINISH,         // 完成
+        FINISH,         // 完成标志
     };
 
+    //自定义解析结果
     enum HTTP_CODE {
         NO_REQUEST = 0,
         GET_REQUEST,
@@ -49,14 +50,21 @@ public:
     bool IsKeepAlive() const;
 
 private:
+    // 解析请求行
     bool ParseRequestLine_(const std::string& line);
+    //解析请求头
     void ParseHeader_(const std::string& line);
+    //解析请求体
     void ParseBody_(const std::string& line);
 
+    //解析路径
     void ParsePath_();
+    //解析post请求
     void ParsePost_();
+    //解析表单数据
     void ParseFromUrlencoded_();
-
+    
+    //验证用户登录
     static bool UserVerify(const std::string& name, const std::string& pwd, bool isLogin);
 
     PARSE_STATE state_;     // 解析的状态

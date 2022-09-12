@@ -2,13 +2,14 @@
 #define EPOLLER_H
 
 #include <sys/epoll.h> //epoll_ctl()
-#include <fcntl.h>  // fcntl()
-#include <unistd.h> // close()
-#include <assert.h> // close()
+#include <fcntl.h>     // fcntl()
+#include <unistd.h>    // close()
+#include <assert.h>    // close()
 #include <vector>
 #include <errno.h>
 
-class Epoller {
+class Epoller
+{
 public:
     //最大检测事件数，模式1024
     explicit Epoller(int maxEvent = 1024);
@@ -32,11 +33,11 @@ public:
 
     //获取连接事件
     uint32_t GetEvents(size_t i) const;
-        
-private:
-    int epollFd_;   // epoll_create()创建一个epoll对象，返回值就是epollFd
 
-    std::vector<struct epoll_event> events_;     // 检测到的事件(epoll连接事件)的集合 
+private:
+    int epollFd_; // epoll_create()创建一个epoll对象，返回值就是epollFd
+
+    std::vector<struct epoll_event> events_; // 检测到的事件(epoll连接事件)的集合
 };
 
-#endif //EPOLLER_H
+#endif // EPOLLER_H
