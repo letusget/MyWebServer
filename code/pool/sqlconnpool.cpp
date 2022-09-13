@@ -7,6 +7,7 @@ SqlConnPool::SqlConnPool()
     freeCount_ = 0;
 }
 
+//单例模式，返回 创建的对象的引用
 SqlConnPool *SqlConnPool::Instance()
 {
     static SqlConnPool connPool;
@@ -18,6 +19,8 @@ void SqlConnPool::Init(const char *host, int port,
                        int connSize = 10)
 {
     assert(connSize > 0);
+
+    //创建连接
     for (int i = 0; i < connSize; i++)
     {
         MYSQL *sql = nullptr;
@@ -27,6 +30,7 @@ void SqlConnPool::Init(const char *host, int port,
             LOG_ERROR("MySql init error!");
             assert(sql);
         }
+        //连接数据库
         sql = mysql_real_connect(sql, host,
                                  user, pwd,
                                  dbName, port, nullptr, 0);
@@ -34,9 +38,11 @@ void SqlConnPool::Init(const char *host, int port,
         {
             LOG_ERROR("MySql Connect error!");
         }
+        //放入连接队列
         connQue_.push(sql);
     }
     MAX_CONN_ = connSize;
+    //初始化信号量
     sem_init(&semId_, 0, MAX_CONN_);
 }
 
@@ -48,20 +54,25 @@ MYSQL *SqlConnPool::GetConn()
         LOG_WARN("SqlConnPool busy!");
         return nullptr;
     }
+
+    //在有空闲连接时才执行
     sem_wait(&semId_);
     {
         lock_guard<mutex> locker(mtx_);
+        //取出连接
         sql = connQue_.front();
         connQue_.pop();
     }
     return sql;
 }
 
+//释放连接
 void SqlConnPool::FreeConn(MYSQL *sql)
 {
     assert(sql);
     lock_guard<mutex> locker(mtx_);
     connQue_.push(sql);
+    //数据库可连接数增加
     sem_post(&semId_);
 }
 
@@ -74,12 +85,14 @@ void SqlConnPool::ClosePool()
         connQue_.pop();
         mysql_close(item);
     }
+    //整体管理 数据库资源
     mysql_library_end();
 }
 
 int SqlConnPool::GetFreeConnCount()
 {
     lock_guard<mutex> locker(mtx_);
+    //返回空闲连接数量
     return connQue_.size();
 }
 

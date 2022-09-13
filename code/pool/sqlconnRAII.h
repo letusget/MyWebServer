@@ -5,6 +5,7 @@
 /* 资源在对象构造初始化 资源在对象析构时释放*/
 class SqlConnRAII {
 public:
+    // 获取数据库连接池的连接，用于析构
     SqlConnRAII(MYSQL** sql, SqlConnPool *connpool) {
         assert(connpool);
         *sql = connpool->GetConn();

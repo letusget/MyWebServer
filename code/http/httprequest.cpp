@@ -97,6 +97,7 @@ void HttpRequest::ParsePath_()
     // 例如 http://192.168.110.111:10000/
     if (path_ == "/")
     {
+        //请求根路径，默认index.html
         path_ = "/index.html";
     }
     else
@@ -105,6 +106,7 @@ void HttpRequest::ParsePath_()
         // 例如 http://192.168.110.111:10000/regist
         for (auto &item : DEFAULT_HTML)
         {
+            //由服务器解析并加上文件后缀
             if (item == path_)
             {
                 path_ += ".html";
@@ -116,7 +118,7 @@ void HttpRequest::ParsePath_()
 
 bool HttpRequest::ParseRequestLine_(const string &line)
 {
-    // GET / HTTP/1.1  正则表达式进行匹配
+    // GET / HTTP/1.1  正则表达式进行匹配，不考虑其他意外错误情况
     regex patten("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$");
     smatch subMatch;
     if (regex_match(line, subMatch, patten))
