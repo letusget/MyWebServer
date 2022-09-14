@@ -171,6 +171,7 @@ int HttpRequest::ConverHex(char ch)
 
 void HttpRequest::ParsePost_()
 {
+    //post 请求头
     if (method_ == "POST" && header_["Content-Type"] == "application/x-www-form-urlencoded")
     {
         // 解析表单信息
@@ -266,7 +267,7 @@ bool HttpRequest::UserVerify(const string &name, const string &pwd, bool isLogin
     {
         flag = true;
     }
-    /* 查询用户及密码 */
+    /* 拼接order语句，查询用户及密码 */
     snprintf(order, 256, "SELECT username, password FROM user WHERE username='%s' LIMIT 1", name.c_str());
     LOG_DEBUG("%s", order);
 

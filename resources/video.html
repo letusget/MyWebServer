@@ -1,85 +1,25 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	
-	<style type="text/css">
-
-	#box 
-	{
-		width: auto;  /* 盒子也要自动缩放 */
-		height: auto; 
-		max-width: 90%;
-		max-height: 90%; /* 盒子的高度,需要大于图片100%宽度时 图片的高度 */
-		border: 5px solid yellow;
-		
-		margin: auto;
-		position: absolute;
-		top: 80px;
-		left: 0;
-		right: 0;
-		bottom: 0;
-	}
-
-	img 
-	{
-		width: auto;
-		height: auto;
-		max-width: 100%; /* 只要宽度100% 结合前面 auto就可以了 */
-		
-	}
-
-</style>
-	
-    <title>首页</title>
-</head>
-<body>
-
-    <h1 align="center">欢迎来到夏海藻的首页~</h1> </br>
-	<div id="box" >
-		<img src="images/image2.jpg"  alt="ces" />
-	<div>
-    
-    
-</body>
-</html> -->
-
-<!--
- * @Author       : mark
- * @Date         : 2020-06-30
- * @copyleft GPL 2.0
--->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <title>MARK-首页</title>
+    <title>夏海藻的服务器-视频</title>
     <link rel="icon" href="images/favicon.ico">
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/animate.css">
     <link rel="stylesheet" href="css/magnific-popup.css">
     <link rel="stylesheet" href="css/font-awesome.min.css">
-
     <!-- Main css -->
     <link rel="stylesheet" href="css/style.css">
-
 </head>
 
 <body data-spy="scroll" data-target=".navbar-collapse" data-offset="50">
-
     <!-- PRE LOADER -->
     <div class="preloader">
         <div class="spinner">
             <span class="spinner-rotate"></span>
         </div>
     </div>
-
-
     <!-- NAVIGATION SECTION -->
     <div class="navbar custom-navbar navbar-fixed-top" role="navigation">
         <div class="container">
@@ -90,7 +30,6 @@
                          <span class="icon icon-bar"></span>
                          <span class="icon icon-bar"></span>
                     </button>
-                <!-- lOGO TEXT HERE -->
                 <a href="/" class="navbar-brand">Mark</a>
             </div>
             <div class="collapse navbar-collapse">
@@ -102,23 +41,33 @@
                     <li><a class="smoothScroll" href="/register">注册</a></li>
                 </ul>
             </div>
-
         </div>
     </div>
-    <!-- HOME SECTION -->
+
     <section id="home">
         <div class="container">
             <div class="row">
-
                 <div class="col-md-offset-1 col-md-2 col-sm-3">
                     <img src="images/profile-image.jpg" class="wow fadeInUp img-responsive img-circle" data-wow-delay="0.2s" alt="about image">
                 </div>
                 <div class="col-md-8 col-sm-8">
-                    <h1 class="wow fadeInUp" data-wow-delay="0.6s">你好，这是首页。</h1>
+                    <h1 class="wow fadeInUp" data-wow-delay="0.6s">视频测试</h1>
                 </div>
             </div>
         </div>
     </section>
+    <!-- HOME SECTION -->
+    <section id="home">
+        <div class="container">
+            <div class="row">
+                <div align="center"><video width="906" height="506" controls>
+                              <source src="/video/presentation.mp4" type="video/mp4">
+                         </video>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- SCRIPTS -->
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.min.js"></script>
@@ -127,6 +76,7 @@
     <script src="js/magnific-popup-options.js"></script>
     <script src="js/wow.min.js"></script>
     <script src="js/custom.js"></script>
+
 </body>
 
 </html>
