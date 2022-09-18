@@ -54,6 +54,7 @@ void HeapTimer::add(int id, int timeout, const TimeoutCallBack &cb)
         i = heap_.size();
         ref_[id] = i;
         heap_.push_back({id, Clock::now() + MS(timeout), cb});
+        //小根堆调整
         siftup_(i); // 向上调整，跟父亲比较
     }
     else
@@ -108,7 +109,8 @@ void HeapTimer::adjust(int id, int timeout)
     /* 调整指定id的结点 */
     assert(!heap_.empty() && ref_.count(id) > 0);
     heap_[ref_[id]].expires = Clock::now() + MS(timeout);
-    ;
+
+    //新超时时间 肯定比原来的大，所以要向下调整超时时间
     siftdown_(ref_[id], heap_.size());
 }
 
@@ -134,6 +136,7 @@ void HeapTimer::tick()
 void HeapTimer::pop()
 {
     assert(!heap_.empty());
+    //删除 堆顶元素
     del_(0);
 }
 

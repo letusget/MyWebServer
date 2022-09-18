@@ -74,6 +74,7 @@ void Log::init(int level = 1, const char *path, const char *suffix,
     path_ = path;
     suffix_ = suffix;
     char fileName[LOG_NAME_LEN] = {0};
+    //写日志信息
     snprintf(fileName, LOG_NAME_LEN - 1, "%s/%04d_%02d_%02d%s",
              path_, t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, suffix_);
     toDay_ = t.tm_mday;
@@ -81,6 +82,7 @@ void Log::init(int level = 1, const char *path, const char *suffix,
     {
         lock_guard<mutex> locker(mtx_);
         buff_.RetrieveAll();
+        //打开上次没有写入的日志文件，再进行写入新的日志文件
         if (fp_)
         {
             flush();

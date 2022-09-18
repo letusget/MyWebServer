@@ -50,7 +50,7 @@ bool Epoller::DelFd(int fd)
 // 调用epoll_wait()进行事件检测
 int Epoller::Wait(int timeoutMs)
 {
-    //一定要传递数组地址！
+    //一定要传递数组地址！使用超时时间timeoutMs，作为设置epoll_wait 是否阻塞的标志
     return epoll_wait(epollFd_, &events_[0], static_cast<int>(events_.size()), timeoutMs);
 }
 

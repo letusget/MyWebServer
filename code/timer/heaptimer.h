@@ -20,7 +20,9 @@ struct TimerNode
 {
     int id;
     TimeStamp expires;
+    //回调函数
     TimeoutCallBack cb;
+    //重载比较< 
     bool operator<(const TimerNode &t)
     {
         return expires < t.expires;
@@ -58,6 +60,7 @@ private:
 
     std::vector<TimerNode> heap_;
 
+    //保存索引关系
     std::unordered_map<int, size_t> ref_;
 };
 

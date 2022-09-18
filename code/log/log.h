@@ -38,7 +38,7 @@ private:
 private:
     static const int LOG_PATH_LEN = 256;
     static const int LOG_NAME_LEN = 256;
-    static const int MAX_LINES = 50000;
+    static const int MAX_LINES = 50000; //每个日志文件的 行数，超过就会创建新的日志文件
 
     const char *path_;
     const char *suffix_;
@@ -71,6 +71,7 @@ private:
         }                                              \
     } while (0);
 
+//设置打印日志的级别
 #define LOG_DEBUG(format, ...)             \
     do                                     \
     {                                      \
